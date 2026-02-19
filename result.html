@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <!-- 필수 메타 -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>청BTI 테스트 결과</title>
+
+  <!-- 주소창 테마색 -->
+  <meta name="theme-color" content="#2563eb" />
+
+  <!-- 정규화 URL(배포 도메인으로 교체) -->
+  <link rel="canonical" href="https://example.com/result.html" />
+
+  <!-- 파비콘(필요시 교체) -->
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+  <!-- OG/Twitter(정적 페이지라 결과별로 바꾸기 어려움) -->
+  <meta property="og:title" content="청BTI 테스트 결과" />
+  <meta property="og:description" content="나의 청랑 유형을 확인하고 친구들과 공유하세요." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="preview.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    @media (prefers-reduced-motion: reduce) {
+      .animate-bounce { animation: none !important; }
+    }
+    /* 과하지 않은 로고 모션(살짝 둥실) */
+    @keyframes floaty { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+    .logo-floaty { animation: floaty 2.8s ease-in-out infinite; }
+  </style>
+</head>
+
+<body class="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-100 to-indigo-200 dark:from-neutral-900 dark:to-neutral-800 font-sans p-4">
+  <div class="bg-white dark:bg-neutral-900 dark:text-neutral-100 p-8 rounded-3xl shadow-2xl w-[95%] max-w-xl text-center border-4 border-blue-300 dark:border-neutral-700">
+
+    <!-- 로고 -->
+    <div class="w-full flex flex-col items-center mb-4">
+      <img src="logo.png" alt="청랑 로고" class="h-16 sm:h-20 object-contain logo-floaty">
+      <div class="w-10 h-1 bg-blue-400 rounded-full mt-3"></div>
+    </div>
+
+    <!-- 장식 이모지 -->
+    <div class="text-6xl mb-4" aria-hidden="true">💠</div>
+
+    <!-- 페이지 타이틀 -->
+    <h1 class="text-3xl font-extrabold text-blue-700 dark:text-blue-300 mb-6">
+      청BTI 결과 🏄🏻‍♂️
+    </h1>
+
+    <!-- 결과 제목 -->
+    <div
+      id="result-text"
+      class="text-2xl text-gray-800 dark:text-neutral-100 font-bold mb-3"
+      role="status"
+      aria-live="polite"
+    ></div>
+
+    <!-- 결과 설명 -->
+    <div
+      id="result-desc"
+      class="text-base text-gray-700 dark:text-neutral-300 leading-relaxed mb-6 whitespace-pre-line"
+    ></div>
+
+    <!-- 결과 이미지 -->
+    <img
+      id="result-img"
+      src=""
+      alt="청BTI 결과 카드"
+      loading="lazy"
+      class="mx-auto w-72 sm:w-80 rounded-2xl shadow-md border-2 border-blue-200 dark:border-neutral-700 mb-4"
+    />
+
+    <!-- 이미지 설명(사진 아래 텍스트) -->
+    <div
+      id="result-caption"
+      class="text-sm text-gray-600 dark:text-neutral-400 italic mb-6"
+    ></div>
+
+    <!-- 버튼 영역 -->
+    <div class="space-y-3">
+      <button
+        type="button"
+        id="retakeBtn"
+        class="w-full py-3 bg-blue-600 text-white text-lg font-semibold rounded-xl shadow-md hover:bg-blue-700 hover:scale-105 transition transform duration-300 focus:outline-none focus-visible:ring-4 focus-visible:ring-blue-300"
+        aria-label="다시 테스트하기로 이동"
+      >
+        다시 테스트하기 🔁
+      </button>
+
+      <button
+        type="button"
+        id="shareBtn"
+        class="w-full py-3 bg-sky-500 text-white text-lg font-semibold rounded-xl shadow-md hover:bg-sky-600 hover:scale-105 transition transform duration-300 focus:outline-none focus-visible:ring-4 focus-visible:ring-sky-300"
+        aria-label="결과를 공유하기"
+      >
+        결과 공유하기 📤
+      </button>
+
+      <button
+        type="button"
+        id="copyBtn"
+        class="w-full py-3 bg-gray-200 dark:bg-neutral-800 text-gray-800 dark:text-neutral-100 text-sm font-medium rounded-xl hover:bg-gray-300 dark:hover:bg-neutral-700 transition focus:outline-none focus-visible:ring-4 focus-visible:ring-gray-300"
+        aria-label="공유 링크 복사"
+      >
+        링크 복사하기 🔗
+      </button>
+    </div>
+
+    <p id="notice" class="text-xs text-gray-500 dark:text-neutral-400 mt-4"></p>
+  </div>
+
+  <script>
+    /* 0) 다크모드 동기화 */
+    (function initColorScheme() {
+      const mq = window.matchMedia("(prefers-color-scheme: dark)");
+      document.documentElement.classList.toggle("dark", mq.matches);
+      mq.addEventListener?.("change", (e) => {
+        document.documentElement.classList.toggle("dark", e.matches);
+      });
+    })();
+
+    /* 1) 결과 사전 (이미지: first.png / second.png / third.png) */
+    const RESULTS = {
+      giun: {
+        dept: "기획운영부",
+        text: "📊똑똑이 유생",
+        desc:
+`당신은 청랑의 브레인🧠
+전체 구조를 짜고, 일정을 관리하며, 판을 야무지게 설계하는 타입!
+“이거 누가 총괄해?” 하면 자연스럽게 당신 이름이 나오겠군요💚`,
+        img: "first.png",
+        caption: "판을 설계하고 흐름을 잡는 ‘기운’ 타입 💚"
+      },
+      ingyeong: {
+        dept: "인사경영부",
+        text: "⚖️인간 저울 유생",
+        desc:
+`당신은 청랑의 심장❤️‍🔥
+다른 사람을 잘 챙기고 분위기를 살피며, 갈등이 발생하면 체계적이고 공평하게 중재하는 타입!
+"나 고민 있어" 하면 다들 자연스럽게 당신을 찾을거예요💛`,
+        img: "second.png",
+        caption: "팀의 밸런스를 지키는 ‘인경’ 타입 💛"
+      },
+      daehong: {
+        dept: "대외홍보부",
+        text: "🪴아이디어 화수분 유생",
+        desc:
+`당신은 청랑의 얼굴🤴
+말보다 이미지가 빠르고, 트렌드에 대한 센스가 뛰어나며, 아이디어가 끊임없이 나오는 화수분 타입!
+“이거 어떤 거 해?”라는 말이 나오기도 전에 이미 당신이 방향키를 쥐고 있네요🩵`,
+        img: "third.png",
+        caption: "반응을 터뜨리는 ‘대홍’ 타입 🩵"
+      }
+    };
+
+    const DEFAULT_RESULT = {
+      dept: "결과 준비중",
+      text: "결과 준비중 💠",
+      desc: "유효한 결과가 없습니다. 테스트를 다시 진행해주세요.",
+      img: "first.png",
+      caption: ""
+    };
+
+    /* 2) 결과 키 가져오기
+       - 우선순위: URL ?type=giun|ingyeong|daehong > localStorage('resultKey')
+       - quiz.html에서 저장한 resultKey 사용
+    */
+    function getResultKeyAndNormalizeURL() {
+      let key = null;
+      try {
+        const url = new URL(location.href);
+        const q = url.searchParams.get("type");
+        const fromQuery = q ? q.toLowerCase().trim() : null;
+        const fromStorage =
+          (window.localStorage && localStorage.getItem("resultKey")) || null;
+
+        if (fromQuery && RESULTS[fromQuery]) {
+          key = fromQuery;
+        } else if (fromStorage && RESULTS[fromStorage]) {
+          key = fromStorage;
+          if (url.searchParams.get("type") !== key) {
+            url.searchParams.set("type", key);
+            history.replaceState(null, "", url.toString());
+          }
+        }
+      } catch {}
+      return key;
+    }
+
+    /* 3) 이미지 선로딩 */
+    (function preloadImages() {
+      ["first.png", "second.png", "third.png"].forEach((src) => {
+        const img = new Image();
+        img.src = src;
+      });
+    })();
+
+    /* 4) 렌더 */
+    function render() {
+      const key = getResultKeyAndNormalizeURL();
+      const data = key ? RESULTS[key] : DEFAULT_RESULT;
+
+      const $text = document.getElementById("result-text");
+      const $desc = document.getElementById("result-desc");
+      const $img = document.getElementById("result-img");
+      const $caption = document.getElementById("result-caption");
+      const $notice = document.getElementById("notice");
+
+      const $shareBtn = document.getElementById("shareBtn");
+      const $copyBtn = document.getElementById("copyBtn");
+      const $retakeBtn = document.getElementById("retakeBtn");
+
+      $text.textContent = `${data.text} (${data.dept})`;
+      $desc.textContent = data.desc;
+      $img.src = data.img;
+      $img.alt = `${data.dept} 결과 이미지`;
+      $caption.textContent = data.caption || "";
+
+      let failedOnce = false;
+      $img.onerror = () => {
+        if (failedOnce) return;
+        failedOnce = true;
+        $img.src = DEFAULT_RESULT.img;
+      };
+
+      // 공유 URL (type 쿼리 포함)
+      const shareURL = new URL(location.href);
+      if (key) shareURL.searchParams.set("type", key);
+
+      $notice.textContent = key
+        ? `공유 링크: ${shareURL.toString()}`
+        : "유효한 결과가 없어 기본 화면을 표시합니다.";
+
+      $retakeBtn.onclick = () => {
+        location.href = "index.html";
+      };
+
+      $shareBtn.onclick = async () => {
+        if ($shareBtn.disabled) return;
+        $shareBtn.disabled = true;
+        $shareBtn.setAttribute("aria-busy", "true");
+
+        try {
+          const shareData = {
+            title: "청BTI 테스트 결과",
+            text: key ? `내 청BTI는 ${data.text} (${data.dept}) 💙` : "청BTI 테스트",
+            url: shareURL.toString(),
+          };
+
+          if (navigator.share) {
+            await navigator.share(shareData);
+          } else {
+            alert("웹 공유 미지원 환경입니다. '링크 복사하기'를 사용하세요.");
+          }
+        } catch (e) {
+          console.info("share failed", e);
+          alert("공유가 취소되었거나 실패했습니다.");
+        } finally {
+          $shareBtn.disabled = false;
+          $shareBtn.removeAttribute("aria-busy");
+        }
+      };
+
+      $copyBtn.onclick = async () => {
+        try {
+          await navigator.clipboard.writeText(shareURL.toString());
+          $notice.textContent = "링크를 클립보드에 복사했습니다.";
+        } catch {
+          const tmp = document.createElement("textarea");
+          tmp.value = shareURL.toString();
+          tmp.setAttribute("readonly", "");
+          tmp.style.position = "absolute";
+          tmp.style.left = "-9999px";
+          document.body.appendChild(tmp);
+          tmp.select();
+          document.execCommand("copy");
+          document.body.removeChild(tmp);
+          $notice.textContent = "링크를 복사했습니다.";
+        }
+      };
+    }
+
+    render();
+  </script>
+</body>
+</html>

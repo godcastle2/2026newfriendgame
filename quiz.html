@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🏄🏻‍♂️청랑 유형 탐구생활🏄🏻‍♂️</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    /* 과하지 않은 로고 모션(살짝 둥실) */
+    @keyframes floaty { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+    .logo-floaty { animation: floaty 2.8s ease-in-out infinite; }
+  </style>
+</head>
+
+<body class="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-100 to-indigo-200 font-sans p-4">
+  <div class="bg-white p-6 sm:p-8 rounded-3xl shadow-2xl w-full sm:w-[90%] max-w-2xl text-center border-4 border-blue-300 min-h-[85vh] flex flex-col justify-between">
+
+    <!-- 상단 로고/타이틀 -->
+    <div>
+      <div class="w-full flex flex-col items-center mb-4">
+        <img src="logo.png" alt="청랑 로고" class="h-16 sm:h-20 object-contain logo-floaty">
+        <div class="w-10 h-1 bg-blue-400 rounded-full mt-3"></div>
+      </div>
+
+      <h1 class="text-3xl sm:text-3xl font-extrabold text-blue-700 mb-2">🏄🏻‍♂️청랑 유형 탐구생활🏄🏻‍♂️</h1>
+      <p class="text-gray-600 text-base sm:text-lg mb-2">7문항으로 보는 나의 청랑 유형 💙</p>
+      <p class="text-gray-500 text-sm mb-4">가장 끌리는 선택지 하나만 고르기 ✨</p>
+    </div>
+
+    <!-- 질문 영역 -->
+    <div id="quiz" class="mb-6 text-xl sm:text-lg font-medium text-gray-700 flex-1 flex items-center justify-center"></div>
+
+    <!-- 결과 버튼 -->
+    <button id="resultBtn" onclick="calculateResult()"
+      class="w-full py-4 bg-blue-600 text-white text-xl font-semibold rounded-xl shadow-md hover:bg-blue-700 hover:scale-105 transition transform hidden">
+      결과 보기 🔎
+    </button>
+
+    <p class="mt-6 text-gray-400 text-xs">© 청랑 💙</p>
+  </div>
+
+  <script>
+    /**
+     * 점수 키
+     * - giun : 기획운영부(기운)
+     * - ingyeong : 인사경영부(인경)
+     * - daehong : 대외홍보부(대홍)
+     */
+
+    const questions = [
+      // 1
+      {
+        q: "1번. 축제 전날 밤, 무대에 서야하는 공연 인원이 변동된다는 글이 올라왔다!🔥",
+        a: [
+          "“일단 전체 일정 다시 짜볼게요!”",
+          "“인원 배치부터 다시 봐야 할 것 같은데요… 다들 너무 걱정하지 맙시다!”",
+          "“이런 느낌으로 홍보포스터 제작하면 어그로 잘 끌리겠는데?”"
+        ],
+        t: ["giun", "ingyeong", "daehong"]
+      },
+
+      // 2
+      {
+        q: "2번. 조별과제에서 당신의 포지션은?✨",
+        a: [
+          "역할 분담, 주제 확정 등 전체 구조를 짜는 사람",
+          "조별 모임에 늦는 친구에게 연락을 하고 분위기를 관리하는 사람",
+          "PPT 디자인하는 사람"
+        ],
+        t: ["giun", "ingyeong", "daehong"]
+      },
+
+      // 3
+      {
+        q: "3번. 회의할 때 당신 모습은?🧐",
+        a: [
+          "“그럼 이건 이렇게, 저건 저렇게 하면 되겠다”",
+          "“근데 이거 다들 부담 안 돼? 이 부분은 내가 할까?”",
+          "“이거 말고 더 재밌는 아이디어 없을까?”"
+        ],
+        t: ["giun", "ingyeong", "daehong"]
+      },
+
+      // 4
+      {
+        q: "4번. 내가 굿즈를 만든다면?🛠️",
+        a: [
+          "실용성 100% (일정표, 체크리스트, 다이어리)",
+          "모두가 쓸 수 있는 것 (스티커, 네임택, 단체템)",
+          "감성 폭발 (키링, 포토카드, 인스타용 굿즈)"
+        ],
+        t: ["giun", "ingyeong", "daehong"]
+      },
+
+      // 5 (요청대로 A/B/C 제거 + 문장 정리)
+      {
+        q: "5번. 단톡에서 읽씹당했을 때 당신은?💔",
+        a: [
+          "“아 내 말이 정리가 안 됐나?” 다시 정리해서 보냄",
+          "“혹시 내가 기분 상하게 했나?” 고민해봄",
+          "“그럼 이 아이디어는 어때? 이것도 잡솨봐~” 하나 더 보냄"
+        ],
+        t: ["giun", "ingyeong", "daehong"]
+      },
+
+      // 6
+      {
+        q: "6번. 가장 설레는 순간은?💓",
+        a: [
+          "일정표 딱 맞게 흘러갈 때",
+          "팀 분위기 좋을 때",
+          "내 콘텐츠 반응 터질 때"
+        ],
+        t: ["giun", "ingyeong", "daehong"]
+      },
+
+     // 7 (추가 문항)
+    {
+    q: "7번. 청랑의 신입유생이 된 당신, 가장 먼저 드는 생각은? 💙",
+    a: [
+        "‘어떤 행사가 있는지 궁금하다… 나도 한번 직접 해보고 싶다.’ 📌",
+        "‘사람들 분위기 좋아 보인다… 빨리 다 같이 친해지고 싶다.’ 🤝",
+        "‘와, 옷 진짜 예쁘다… 단체복 입는 날이 기대된다.’ 👕✨"
+    ],
+    t: ["giun", "ingyeong", "daehong"]
+    },
+
+    ];
+
+    let current = 0;
+    let scores = { giun: 0, ingyeong: 0, daehong: 0 };
+    let lastPicked = null; // 동점 처리(마지막 선택 우선)
+
+    function loadQuestion() {
+      if (current < questions.length) {
+        const q = questions[current];
+
+        document.getElementById("quiz").innerHTML = `
+          <div class="w-full">
+            <div class="mb-2 text-sm text-gray-500">Q${current + 1} / ${questions.length}</div>
+            <div class="mb-6 text-2xl sm:text-xl font-semibold">${q.q}</div>
+
+            <div class="flex flex-col space-y-3">
+              <button onclick="selectAnswer('${q.t[0]}')"
+                class="py-4 text-lg sm:text-base bg-blue-600 text-white rounded-xl shadow hover:bg-blue-700 hover:scale-[1.02] transition transform">
+                ${q.a[0]}
+              </button>
+
+              <button onclick="selectAnswer('${q.t[1]}')"
+                class="py-4 text-lg sm:text-base bg-sky-500 text-white rounded-xl shadow hover:bg-sky-600 hover:scale-[1.02] transition transform">
+                ${q.a[1]}
+              </button>
+
+              <button onclick="selectAnswer('${q.t[2]}')"
+                class="py-4 text-lg sm:text-base bg-indigo-500 text-white rounded-xl shadow hover:bg-indigo-600 hover:scale-[1.02] transition transform">
+                ${q.a[2]}
+              </button>
+            </div>
+          </div>
+        `;
+
+        document.getElementById("resultBtn").classList.add("hidden");
+      } else {
+        document.getElementById("quiz").innerHTML = `
+          <div class="w-full">
+            <p class="text-2xl font-medium text-gray-700 mb-2">모든 질문 완료! 🎉</p>
+            <p class="text-sm text-gray-500">결과를 확인해요 🔎</p>
+          </div>
+        `;
+        document.getElementById("resultBtn").classList.remove("hidden");
+      }
+    }
+
+    function selectAnswer(trait) {
+      scores[trait]++;
+      lastPicked = trait;
+      current++;
+      loadQuestion();
+    }
+
+    function calculateResult() {
+      const entries = Object.entries(scores);
+      const maxScore = Math.max(...entries.map(([, v]) => v));
+      const topKeys = entries.filter(([, v]) => v === maxScore).map(([k]) => k);
+
+      let resultKey = topKeys[0];
+      if (topKeys.length > 1 && lastPicked && topKeys.includes(lastPicked)) {
+        resultKey = lastPicked;
+      }
+
+      const resultMap = {
+        giun: {
+          dept: "기획운영부",
+          title: "📊똑똑이 유생",
+          desc:
+`당신은 청랑의 브레인🧠
+전체 구조를 짜고, 일정을 관리하며, 판을 야무지게 설계하는 타입!
+“이거 누가 총괄해?” 하면 자연스럽게 당신 이름이 나오겠군요💚`
+        },
+        ingyeong: {
+          dept: "인사경영부",
+          title: "⚖️인간 저울 유생",
+          desc:
+`당신은 청랑의 심장❤️‍🔥
+다른 사람을 잘 챙기고 분위기를 살피며, 갈등이 발생하면 체계적이고 공평하게 중재하는 타입!
+"나 고민 있어" 하면 다들 자연스럽게 당신을 찾을거예요💛`
+        },
+        daehong: {
+          dept: "대외홍보부",
+          title: "🪴아이디어 화수분 유생",
+          desc:
+`당신은 청랑의 얼굴🤴
+말보다 이미지가 빠르고, 트렌드에 대한 센스가 뛰어나며, 아이디어가 끊임없이 나오는 화수분 타입!
+“이거 어떤 거 해?”라는 말이 나오기도 전에 이미 당신이 방향키를 쥐고 있네요🩵`
+        }
+      };
+
+      localStorage.setItem("resultKey", resultKey);
+      localStorage.setItem("resultDept", resultMap[resultKey].dept);
+      localStorage.setItem("resultTitle", resultMap[resultKey].title);
+      localStorage.setItem("resultDesc", resultMap[resultKey].desc);
+      localStorage.setItem("scores", JSON.stringify(scores));
+
+      window.location.href = "result.html";
+    }
+
+    loadQuestion();
+  </script>
+</body>
+</html>
