@@ -1,23 +1,17 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <!-- 필수 메타 -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>청BTI 테스트 결과</title>
 
-  <!-- 주소창 테마색 -->
   <meta name="theme-color" content="#2563eb" />
-
-  <!-- 정규화 URL(배포 도메인으로 교체) -->
   <link rel="canonical" href="https://example.com/result.html" />
 
-  <!-- 파비콘(필요시 교체) -->
   <link rel="icon" href="/favicon.ico" sizes="any" />
   <link rel="icon" href="/icon.svg" type="image/svg+xml" />
   <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 
-  <!-- OG/Twitter(정적 페이지라 결과별로 바꾸기 어려움) -->
   <meta property="og:title" content="청BTI 테스트 결과" />
   <meta property="og:description" content="나의 청랑 유형을 확인하고 친구들과 공유하세요." />
   <meta property="og:type" content="website" />
@@ -29,6 +23,7 @@
   <style>
     @media (prefers-reduced-motion: reduce) {
       .animate-bounce { animation: none !important; }
+      .logo-floaty { animation: none !important; }
     }
     /* 과하지 않은 로고 모션(살짝 둥실) */
     @keyframes floaty { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
@@ -39,18 +34,15 @@
 <body class="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-100 to-indigo-200 dark:from-neutral-900 dark:to-neutral-800 font-sans p-4">
   <div class="bg-white dark:bg-neutral-900 dark:text-neutral-100 p-8 rounded-3xl shadow-2xl w-[95%] max-w-xl text-center border-4 border-blue-300 dark:border-neutral-700">
 
-    <!-- 로고 -->
-    <div class="w-full flex flex-col items-center mb-4">
-      <img src="logo.png" alt="청랑 로고" class="h-16 sm:h-20 object-contain logo-floaty">
-      <div class="w-10 h-1 bg-blue-400 rounded-full mt-3"></div>
+    <!-- 로고(💠 대신 로고만 강조) -->
+    <div class="w-full flex flex-col items-center mb-6">
+      <img src="logo.png" alt="청랑 로고" class="h-20 sm:h-24 object-contain logo-floaty">
+      <div class="w-12 h-1 bg-blue-400 rounded-full mt-3"></div>
     </div>
-
-    <!-- 장식 이모지 -->
-    <div class="text-6xl mb-4" aria-hidden="true">💠</div>
 
     <!-- 페이지 타이틀 -->
     <h1 class="text-3xl font-extrabold text-blue-700 dark:text-blue-300 mb-6">
-      청BTI 결과 🏄🏻‍♂️
+      청BTI 결과
     </h1>
 
     <!-- 결과 제목 -->
@@ -76,7 +68,7 @@
       class="mx-auto w-72 sm:w-80 rounded-2xl shadow-md border-2 border-blue-200 dark:border-neutral-700 mb-4"
     />
 
-    <!-- 이미지 설명(사진 아래 텍스트) -->
+    <!-- 이미지 설명 -->
     <div
       id="result-caption"
       class="text-sm text-gray-600 dark:text-neutral-400 italic mb-6"
@@ -135,7 +127,7 @@
 전체 구조를 짜고, 일정을 관리하며, 판을 야무지게 설계하는 타입!
 “이거 누가 총괄해?” 하면 자연스럽게 당신 이름이 나오겠군요💚`,
         img: "first.png",
-        caption: "판을 설계하고 흐름을 잡는 ‘기운’ 타입 💚"
+        caption: "판을 설계하고 흐름을 잡는 ‘기획운영부’ 타입 💚"
       },
       ingyeong: {
         dept: "인사경영부",
@@ -145,7 +137,7 @@
 다른 사람을 잘 챙기고 분위기를 살피며, 갈등이 발생하면 체계적이고 공평하게 중재하는 타입!
 "나 고민 있어" 하면 다들 자연스럽게 당신을 찾을거예요💛`,
         img: "second.png",
-        caption: "팀의 밸런스를 지키는 ‘인경’ 타입 💛"
+        caption: "팀의 밸런스를 지키는 ‘인사경영부’ 타입 💛"
       },
       daehong: {
         dept: "대외홍보부",
@@ -155,22 +147,19 @@
 말보다 이미지가 빠르고, 트렌드에 대한 센스가 뛰어나며, 아이디어가 끊임없이 나오는 화수분 타입!
 “이거 어떤 거 해?”라는 말이 나오기도 전에 이미 당신이 방향키를 쥐고 있네요🩵`,
         img: "third.png",
-        caption: "반응을 터뜨리는 ‘대홍’ 타입 🩵"
+        caption: "반응을 터뜨리는 ‘대외홍보부’ 타입 🩵"
       }
     };
 
     const DEFAULT_RESULT = {
       dept: "결과 준비중",
-      text: "결과 준비중 💠",
+      text: "결과 준비중",
       desc: "유효한 결과가 없습니다. 테스트를 다시 진행해주세요.",
       img: "first.png",
       caption: ""
     };
 
-    /* 2) 결과 키 가져오기
-       - 우선순위: URL ?type=giun|ingyeong|daehong > localStorage('resultKey')
-       - quiz.html에서 저장한 resultKey 사용
-    */
+    /* 2) 결과 키 가져오기: URL ?type=... > localStorage('resultKey') */
     function getResultKeyAndNormalizeURL() {
       let key = null;
       try {
@@ -229,7 +218,6 @@
         $img.src = DEFAULT_RESULT.img;
       };
 
-      // 공유 URL (type 쿼리 포함)
       const shareURL = new URL(location.href);
       if (key) shareURL.searchParams.set("type", key);
 
