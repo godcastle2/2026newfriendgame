@@ -1,10 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <link rel="preload" as="image" href="first.png">
-  <link rel="preload" as="image" href="second.png">
-  <link rel="preload" as="image" href="third.png">
-
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>🏄🏻‍♂️청랑 유형 탐구생활🏄🏻‍♂️</title>
@@ -45,13 +41,11 @@
 
     <!-- 결과 제목 -->
     <div id="result-text"
-         class="text-2xl text-gray-800 font-bold mb-3">
-    </div>
+         class="text-2xl text-gray-800 font-bold mb-3"></div>
 
     <!-- 결과 설명 -->
     <div id="result-desc"
-         class="text-base text-gray-700 leading-relaxed mb-6 whitespace-pre-line">
-    </div>
+         class="text-base text-gray-700 leading-relaxed mb-6 whitespace-pre-line"></div>
 
     <!-- 결과 이미지 -->
     <img
@@ -62,12 +56,12 @@
       fetchpriority="high"
       decoding="async"
       class="mx-auto w-72 sm:w-80 rounded-2xl shadow-md border-2 border-blue-200 mb-4"
+      style="visibility:hidden"
     />
 
     <!-- 이미지 설명 -->
     <div id="result-caption"
-         class="text-sm text-gray-600 italic mb-6">
-    </div>
+         class="text-sm text-gray-600 italic mb-6"></div>
 
     <!-- 버튼 -->
     <div class="space-y-3">
@@ -143,6 +137,35 @@
       return null;
     }
 
+    // ✅ 결과 1장만 preload + 먼저 로드 완료 후 화면에 표시
+    function addPreload(href) {
+      const link = document.createElement("link");
+      link.rel = "preload";
+      link.as = "image";
+      link.href = href;
+      link.fetchPriority = "high";
+      document.head.appendChild(link);
+    }
+
+    function preloadAndSetImage(imgEl, src) {
+      imgEl.style.visibility = "hidden";
+
+      // 결과 1장만 preload(3장 동시 로드 방지)
+      addPreload(src);
+
+      const tmp = new Image();
+      tmp.decoding = "async";
+      tmp.onload = () => {
+        imgEl.src = src;
+        imgEl.style.visibility = "visible";
+      };
+      tmp.onerror = () => {
+        imgEl.alt = `이미지 로드 실패: ${src} (파일명/경로 확인)`;
+        imgEl.style.visibility = "visible";
+      };
+      tmp.src = src;
+    }
+
     function render() {
       const key = getResultKey();
       const data = key ? RESULTS[key] : DEFAULT_RESULT;
@@ -151,11 +174,14 @@
         `${data.text} (${data.dept})`;
 
       document.getElementById("result-desc").textContent = data.desc;
-      document.getElementById("result-img").src = data.img;
       document.getElementById("result-caption").textContent = data.caption;
+
+      const imgEl = document.getElementById("result-img");
+      preloadAndSetImage(imgEl, data.img);
     }
 
     document.getElementById("retakeBtn").onclick = () => {
+      // 네 파일명이 quiz.html이면 여기 quiz.html로 바꾸면 됨
       location.href = "index.html";
     };
 
@@ -189,4 +215,3 @@
 
 </body>
 </html>
-
